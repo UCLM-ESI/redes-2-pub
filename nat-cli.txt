@@ -1,0 +1,55 @@
+Static NAT (Network Address Translation) - Static NAT (Network Address Translation) is one-to-one mapping of a private IP address to a public IP address.
+Static NAT is useful when a network device inside a private network needs to be accessible from internet.
+Dynamic NAT (Network Address Translation) - Dynamic NAT can be defined as mapping of a private IP address to a public IP address from a group of public
+IP addresses called as NAT pool. Dynamic NAT establishes a one-to-one mapping between a private IP address to a public IP address. Here the public IP address
+is taken from the pool of IP addresses configured on the end NAT router. The public to private mapping may vary based on the available public IP address in NAT pool.
+PAT (Port Address Translation) - Port Address Translation (PAT) is another type of dynamic NAT which can map multiple private IP addresses to a single public IP address
+by using a technology known as Port Address Translation.
+
+Dynamic NAT (n-m)
+Router0#enable
+Router0#configure t
+Router0(config)#access-list 1 permit 192.168.10.2 0.0.0.0
+Router0(config)#access-list 1 permit 192.168.10.3 0.0.0.0
+Router0(config)#access-list 1 permit 192.168.10.4 0.0.0.0
+Router0(config)#access-list 1 deny any
+Router0(config)#ip nat pool mypool 161.67.26.1 161.67.26.1 netmask 255.255.255.240
+Router0(config)#ip nat inside source list 1 pool mypool
+Router0(config)#interface FastEthernet0/0
+Router0(config-if)#ip nat inside
+Router0(config-if)#exit
+Router0(config)#interface Serial2/0
+Router0(config-if)#ip nat outside
+Router0(config-if)#exit
+
+
+Static NAT (n-1):
+Router0#enable
+Router0#configure t
+Router0(config)#ip nat inside source static 192.168.10.2 161.67.26.1
+Router0(config)#ip nat inside source static 192.168.10.3 161.67.26.1
+Router0(config)#ip nat inside source static 192.168.10.4 161.67.26.1
+Router0(config)#interface FastEthernet0/0
+Router0(config-if)#ip nat inside
+Router0(config-if)#exit
+Router0(config)#interface Serial2/0
+Router0(config-if)#ip nat outside
+Router0(config-if)#exit
+
+#test
+PC0>ipconfig
+PC0>ping 192.168.10.3
+PC0>ping 161.67.25.2
+
+Router0#en
+Router0#show ip access list 1
+Router0#show ip nat translations
+PAT/NAT forwarding:
+Router0#enable
+Router0#configure t
+Router0(config)#ip nat inside source static tcp 192.168.0.12 80 161.67.100.1 80
+Router0(config-if)#ip nat inside
+Router0(config-if)#exit
+Router0(config)#interface Serial2/0
+Router0(config-if)#ip nat outside
+Router0(config-if)#exit
